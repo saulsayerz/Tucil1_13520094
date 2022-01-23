@@ -27,15 +27,6 @@ typedef struct {
 #define NEFF(K) (K).Neff
 #define ELMTK(K,i) (K).contents[(i)]
 
-// INISIALISASI GLOBAL VARIABLES
-FILE *tape; 
-Matrix crossword;
-Matrix hasil; 
-Keywords keys;
-boolean ketemu;
-boolean betul;
-int perbandingan;
-
 void displayMatrix(Matrix m){
     int i, j;
 	for (i = 0; i < ROWS(m); i++){
@@ -53,14 +44,14 @@ void displayMatrix(Matrix m){
 	}
 }
 
-void readinput(){
+void readinput(Matrix *crossword, Matrix *hasil, Keywords *keys){
     //Reset crossword dan daftar Keywords
-    ROWS(crossword) = 0;
-    COLS(crossword) = 0;
-    NEFF(keys) = 0;
-    ROWS(hasil) = 0;
-    COLS(hasil) = 0;
-    perbandingan = 0;
+    ROWS(*crossword) = 0;
+    COLS(*crossword) = 0;
+    NEFF(*keys) = 0;
+    ROWS(*hasil) = 0;
+    COLS(*hasil) = 0;
+    FILE *tape; 
 
     //bagian input nama file hingga benar
     printf("Silahkan input nama file: ");
@@ -73,7 +64,7 @@ void readinput(){
     tape = fopen(direktori, "r");
     while (tape == NULL)
     {
-        printf("Nama file salah\nsilahkan input ulang nama file: ");
+        printf("Nama file tidak ditemukan\nSilahkan input ulang nama file: ");
         strcpy(direktori, "../test/");
         gets(namafile);
         strcat(direktori, namafile);
@@ -88,43 +79,43 @@ void readinput(){
     while ((c != '\n') || (csebelum != '\n')){
         putchar(c);
         if (c == '\n') {
-            ROWS(crossword) ++;
+            ROWS(*crossword) ++;
             baris++;
-            COLS(crossword) = kolom;
+            COLS(*crossword) = kolom;
             kolom = 0;
         }
         if (c != ' ' && c != '\n') {
-            ELMT(crossword,baris,kolom) = c;
+            ELMT(*crossword,baris,kolom) = c;
             kolom++;
         }
         csebelum = c;
         c = fgetc(tape);
     }
-    printf("Banyaknya baris puzzle adalah %d\n", ROWS(crossword));
-    printf("Banyaknya kolom puzzle adalah %d\n", COLS(crossword));
+    //printf("Banyaknya baris puzzle adalah %d\n", ROWS(*crossword));
+    //printf("Banyaknya kolom puzzle adalah %d\n\n", COLS(*crossword));
 
     //bagian konversi isi file ke keywords 
-    printf("\nDaftar keywordsnya adalah: \n");
+    //printf("\nDaftar keywordsnya adalah: \n");
     char line[100];
     while (fgets(line, sizeof(line), tape)){
-        printf("%s", line);
-        strcpy(ELMTK(keys,NEFF(keys)), line);
-        NEFF(keys) ++; 
+        //printf("%s", line);
+        strcpy(ELMTK(*keys,NEFF(*keys)), line);
+        NEFF(*keys) ++; 
     }
-    printf("\nBanyaknya keywords adalah %d\n\n", NEFF(keys));
+    //printf("\nBanyaknya keywords adalah %d\n\n", NEFF(*keys));
 
     //bagian menghapus newline dari tiap keywords
     int i,j;
-    for (i=0; i<NEFF(keys)-1; i++){
-        ELMTK(keys,i)[strlen(ELMTK(keys,i))-1] = '\0';
+    for (i=0; i<NEFF(*keys)-1; i++){
+        ELMTK(*keys,i)[strlen(ELMTK(*keys,i))-1] = '\0';
     }
 
     //INISIALISASI MATRIKS HASIL BUAT PERCETAKAN
-    ROWS(hasil) = ROWS(crossword);
-    COLS(hasil) = COLS(crossword);
-    for (i=0; i<ROWS(hasil);i++){
-        for (j=0; j<COLS(hasil); j++) {
-            ELMT(hasil, i,j) = '-' ;
+    ROWS(*hasil) = ROWS(*crossword);
+    COLS(*hasil) = COLS(*crossword);
+    for (i=0; i<ROWS(*hasil);i++){
+        for (j=0; j<COLS(*hasil); j++) {
+            ELMT(*hasil, i,j) = '-' ;
         }
     }
 
@@ -144,10 +135,10 @@ void readinput(){
     printf("\n");*/
 }
 
-void checkright(int a, int i, int j){
+void checkright(int a, int i, int j, int *perbandingan, Matrix crossword, Matrix hasil, Keywords keys, boolean *ketemu){
     int panjang = strlen(ELMTK(keys,a));
-    if (!ketemu && (j<COLS(crossword) - panjang + 1)){
-        betul = true;
+    if (!(*ketemu) && (j<COLS(crossword) - panjang + 1)){
+        boolean betul = true;
         int k = 1;
         while (betul && k < panjang ){
             if (ELMT(crossword,i,j+1) != ELMT(keys,a,k)){
@@ -155,7 +146,7 @@ void checkright(int a, int i, int j){
             }
             k++;
             j++;
-            perbandingan ++ ; 
+            (*perbandingan) ++ ; 
         }
         if (betul) {
             j = j - panjang + 1;
@@ -163,7 +154,7 @@ void checkright(int a, int i, int j){
             for (bebas=0; bebas< panjang; bebas ++) {
                 ELMT(hasil,i,j+bebas) = ELMT(keys,a,bebas); 
             }
-            ketemu = true;
+            *ketemu = true;
             printf("%s\n", ELMTK(keys,a)); 
             displayMatrix(hasil); 
             printf("\n");
@@ -175,10 +166,10 @@ void checkright(int a, int i, int j){
     }
 }
 
-void checkdown(int a, int i, int j){
+void checkdown(int a, int i, int j, int *perbandingan, Matrix crossword, Matrix hasil, Keywords keys, boolean *ketemu){
     int panjang = strlen(ELMTK(keys,a));
-    if (!ketemu && (i < ROWS(crossword) - panjang + 1)){
-        betul = true;
+    if (!(*ketemu) && (i < ROWS(crossword) - panjang + 1)){
+        boolean betul = true;
         int k = 1;
         while (betul && k < panjang ){
             if (ELMT(crossword,i+1,j) != ELMT(keys,a,k)){
@@ -186,7 +177,7 @@ void checkdown(int a, int i, int j){
             }
             k++;
             i++;
-            perbandingan ++ ; 
+            (*perbandingan) ++ ; 
         }
         if (betul) {
             i = i - panjang + 1;
@@ -194,7 +185,7 @@ void checkdown(int a, int i, int j){
             for (bebas=0; bebas< panjang; bebas ++) {
                 ELMT(hasil,i+bebas,j) = ELMT(keys,a,bebas); 
             }
-            ketemu = true;
+            *ketemu = true;
             printf("%s\n", ELMTK(keys,a)); 
             displayMatrix(hasil); 
             printf("\n");
@@ -206,10 +197,10 @@ void checkdown(int a, int i, int j){
     }
 }
 
-void checkleft(int a, int i, int j){
+void checkleft(int a, int i, int j, int *perbandingan, Matrix crossword, Matrix hasil, Keywords keys, boolean *ketemu){
     int panjang = strlen(ELMTK(keys,a));
-    if (!ketemu && (j>panjang -2)){
-        betul = true;
+    if (!(*ketemu) && (j>panjang -2)){
+        boolean betul = true;
         int k = 1;
         while (betul && k < panjang ){
             if (ELMT(crossword,i,j-1) != ELMT(keys,a,k)){
@@ -217,7 +208,7 @@ void checkleft(int a, int i, int j){
             }
             k++;
             j--;
-            perbandingan ++ ; 
+            (*perbandingan) ++ ; 
         }
         if (betul) {
             j = j + panjang - 1;
@@ -225,7 +216,7 @@ void checkleft(int a, int i, int j){
             for (bebas=0; bebas< panjang; bebas ++) {
                 ELMT(hasil,i,j-bebas) = ELMT(keys,a,bebas); 
             }
-            ketemu = true;
+            *ketemu = true;
             printf("%s\n", ELMTK(keys,a)); 
             displayMatrix(hasil); 
             printf("\n");
@@ -237,10 +228,10 @@ void checkleft(int a, int i, int j){
     }
 }
 
-void checkup(int a, int i, int j){
+void checkup(int a, int i, int j, int *perbandingan, Matrix crossword, Matrix hasil, Keywords keys, boolean *ketemu){
     int panjang = strlen(ELMTK(keys,a));
-    if (!ketemu && (i>panjang -2)){
-        betul = true;
+    if (!(*ketemu) && (i>panjang -2)){
+        boolean betul = true;
         int k = 1;
         while (betul && k < panjang ){
             if (ELMT(crossword,i-1,j) != ELMT(keys,a,k)){
@@ -248,7 +239,7 @@ void checkup(int a, int i, int j){
             }
             k++;
             i--;
-            perbandingan ++ ; 
+            (*perbandingan) ++ ; 
         }
         if (betul) {
             i = i + panjang - 1;
@@ -256,7 +247,7 @@ void checkup(int a, int i, int j){
             for (bebas=0; bebas< panjang; bebas ++) {
                 ELMT(hasil,i-bebas,j) = ELMT(keys,a,bebas); 
             }
-            ketemu = true;
+            *ketemu = true;
             printf("%s\n", ELMTK(keys,a)); 
             displayMatrix(hasil); 
             printf("\n");
@@ -268,10 +259,10 @@ void checkup(int a, int i, int j){
     }
 }
 
-void checkdownright(int a, int i, int j){
+void checkdownright(int a, int i, int j, int *perbandingan, Matrix crossword, Matrix hasil, Keywords keys, boolean *ketemu){
     int panjang = strlen(ELMTK(keys,a));
-    if (!ketemu && (j<COLS(crossword) - panjang + 1) && (i < ROWS(crossword) - panjang + 1)){
-        betul = true;
+    if (!(*ketemu) && (j<COLS(crossword) - panjang + 1) && (i < ROWS(crossword) - panjang + 1)){
+        boolean betul = true;
         int k = 1;
         while (betul && k < panjang ){
             if (ELMT(crossword,i+1,j+1) != ELMT(keys,a,k)){
@@ -280,7 +271,7 @@ void checkdownright(int a, int i, int j){
             k++;
             j++;
             i++;
-            perbandingan ++ ; 
+            (*perbandingan) ++ ; 
         }
         if (betul) {
             j = j - panjang + 1;
@@ -289,7 +280,7 @@ void checkdownright(int a, int i, int j){
             for (bebas=0; bebas< panjang; bebas ++) {
                 ELMT(hasil,i+bebas,j+bebas) = ELMT(keys,a,bebas); 
             }
-            ketemu = true;
+            *ketemu = true;
             printf("%s\n", ELMTK(keys,a)); 
             displayMatrix(hasil); 
             printf("\n");
@@ -301,10 +292,10 @@ void checkdownright(int a, int i, int j){
     }
 }
 
-void checkdownleft(int a, int i, int j){
+void checkdownleft(int a, int i, int j, int *perbandingan, Matrix crossword, Matrix hasil, Keywords keys, boolean *ketemu){
     int panjang = strlen(ELMTK(keys,a));
-    if (!ketemu && (j>panjang -2) && (i < ROWS(crossword) - panjang + 1)){
-        betul = true;
+    if (!(*ketemu) && (j>panjang -2) && (i < ROWS(crossword) - panjang + 1)){
+        boolean betul = true;
         int k = 1;
         while (betul && k < panjang ){
             if (ELMT(crossword,i+1,j-1) != ELMT(keys,a,k)){
@@ -313,7 +304,7 @@ void checkdownleft(int a, int i, int j){
             k++;
             j--;
             i++;
-            perbandingan ++ ; 
+            (*perbandingan) ++ ; 
         }
         if (betul) {
             j = j + panjang - 1;
@@ -322,7 +313,7 @@ void checkdownleft(int a, int i, int j){
             for (bebas=0; bebas< panjang; bebas ++) {
                 ELMT(hasil,i+bebas,j-bebas) = ELMT(keys,a,bebas); 
             }
-            ketemu = true;
+            *ketemu = true;
             printf("%s\n", ELMTK(keys,a)); 
             displayMatrix(hasil); 
             printf("\n");
@@ -334,10 +325,10 @@ void checkdownleft(int a, int i, int j){
     }
 }
 
-void checkupright(int a, int i, int j){
+void checkupright(int a, int i, int j, int *perbandingan, Matrix crossword, Matrix hasil, Keywords keys, boolean *ketemu){
     int panjang = strlen(ELMTK(keys,a));
-    if (!ketemu && (j<COLS(crossword) - panjang + 1) && (i>panjang -2)){
-        betul = true;
+    if (!(*ketemu) && (j<COLS(crossword) - panjang + 1) && (i>panjang -2)){
+        boolean betul = true;
         int k = 1;
         while (betul && k < panjang ){
             if (ELMT(crossword,i-1,j+1) != ELMT(keys,a,k)){
@@ -346,7 +337,7 @@ void checkupright(int a, int i, int j){
             k++;
             j++;
             i--;
-            perbandingan ++ ; 
+            (*perbandingan) ++ ; 
         }
         if (betul) {
             j = j - panjang + 1;
@@ -355,7 +346,7 @@ void checkupright(int a, int i, int j){
             for (bebas=0; bebas< panjang; bebas ++) {
                 ELMT(hasil,i-bebas,j+bebas) = ELMT(keys,a,bebas); 
             }
-            ketemu = true;
+            *ketemu = true;
             printf("%s\n", ELMTK(keys,a)); 
             displayMatrix(hasil); 
             printf("\n");
@@ -367,10 +358,10 @@ void checkupright(int a, int i, int j){
     }
 }
 
-void checkupleft(int a, int i, int j){
+void checkupleft(int a, int i, int j, int *perbandingan, Matrix crossword, Matrix hasil, Keywords keys, boolean *ketemu){
     int panjang = strlen(ELMTK(keys,a));
-    if (!ketemu && (j>panjang -2) && (i>panjang -2)){
-        betul = true;
+    if (!(*ketemu) && (j>panjang -2) && (i>panjang -2)){
+        boolean betul = true;
         int k = 1;
         while (betul && k < panjang ){
             if (ELMT(crossword,i-1,j-1) != ELMT(keys,a,k)){
@@ -379,7 +370,7 @@ void checkupleft(int a, int i, int j){
             k++;
             j--;
             i--;
-            perbandingan ++ ; 
+            (*perbandingan) ++ ; 
         }
         if (betul) {
             j = j + panjang - 1;
@@ -388,7 +379,7 @@ void checkupleft(int a, int i, int j){
             for (bebas=0; bebas< panjang; bebas ++) {
                 ELMT(hasil,i-bebas,j-bebas) = ELMT(keys,a,bebas); 
             }
-            ketemu = true;
+            *ketemu = true;
             printf("%s\n", ELMTK(keys,a)); 
             displayMatrix(hasil); 
             printf("\n");
@@ -400,25 +391,28 @@ void checkupleft(int a, int i, int j){
     }
 }
 
-void solvePuzzle(){
-    printf("Solusi dari puzzle adalah: \n\n");
+void solvePuzzle(Matrix *crossword, Matrix *hasil, Keywords *keys){
+    printf("\nSolusi dari puzzle adalah: \n\n");
     int a,i,j;
-    for (a=0;a<NEFF(keys);a++) {
+    int perbandingan=0;
+    int selisih = 0;
+    boolean ketemu;
+    for (a=0;a<NEFF(*keys);a++) {
         i = 0;
         j = 0;
-        ketemu = false;
-        while(i < ROWS(crossword) && !ketemu){
-            while (j < COLS(crossword) && !ketemu){
+        ketemu = false; 
+        while(i < ROWS(*crossword) && !ketemu){
+            while (j < COLS(*crossword) && !ketemu){
                 perbandingan ++ ; 
-                if (ELMT(crossword,i,j) == ELMT(keys,a,0)) {
-                    checkright(a,i,j);
-                    checkdown(a,i,j);
-                    checkleft(a,i,j);
-                    checkup(a,i,j);
-                    checkdownright(a,i,j);
-                    checkdownleft(a,i,j);
-                    checkupright(a,i,j);
-                    checkupleft(a,i,j);
+                if (ELMT(*crossword,i,j) == ELMT(*keys,a,0)) {
+                    checkright(a,i,j,&perbandingan,*crossword, *hasil, *keys,&ketemu);
+                    checkdown(a,i,j,&perbandingan,*crossword, *hasil, *keys,&ketemu);
+                    checkleft(a,i,j,&perbandingan,*crossword, *hasil, *keys,&ketemu);
+                    checkup(a,i,j,&perbandingan,*crossword, *hasil, *keys,&ketemu);
+                    checkdownright(a,i,j,&perbandingan,*crossword, *hasil, *keys,&ketemu);
+                    checkdownleft(a,i,j,&perbandingan,*crossword, *hasil, *keys,&ketemu);
+                    checkupright(a,i,j,&perbandingan,*crossword, *hasil, *keys,&ketemu);
+                    checkupleft(a,i,j,&perbandingan,*crossword, *hasil, *keys,&ketemu);
                 }
                 j++;
             }
@@ -427,9 +421,10 @@ void solvePuzzle(){
         }
         i=0; 
         if (!ketemu) {
-            printf("%s tidak ditemukan dalam puzzle\n", ELMTK(keys,a));
+            printf("%s tidak ditemukan dalam puzzle\n", ELMTK(*keys,a));
             printf("\n");
         }
+        //printf("Total perbandingan huruf ada sebanyak %d\n", perbandingan);
     }
     printf("Total perbandingan huruf ada sebanyak %d\n", perbandingan);
 
@@ -440,23 +435,26 @@ int main(){
     char opsi;
     clock_t waktu;
     double waktueksekusi; 
+    Matrix crossword;
+    Matrix hasil; 
+    Keywords keys;
     printf("-------------------------------------------------------------------------------\n");
     printf("Selamat datang di program Word Search Puzzle Solver by Saul Sayers (13520094)\n");
     printf("-------------------------------------------------------------------------------\n\n");
     while (!kelar){
-        readinput();
+        readinput(&crossword, &hasil, &keys);
         waktu = clock();
-        solvePuzzle();
+        solvePuzzle(&crossword, &hasil, &keys);
         waktu = clock() - waktu;
         waktueksekusi = ((double)waktu)/CLOCKS_PER_SEC;
         printf("Waktu eksekusi adalah sebesar %f detik\n\n", waktueksekusi);
-        printf("Proses pencarian kata selesai.\nApakah anda ingin memecahkan puzzle lain?\nKetik y untuk iya dan n untuk tidak (defaultnya y) :  ");
+        printf("Proses pencarian kata selesai.\nApakah anda ingin memecahkan puzzle lain?\nKetik y untuk iya dan n untuk tidak (defaultnya y) : ");
         scanf(" %c",&opsi);
-        printf("-------------------------------------------------------------------------------\n");
+        printf("-----------------------------------------------------------------------------------------\n");
         if (opsi == 'n' ){
             kelar = true; 
             printf("Terimakasih sudah menggunakan program Word Search Puzzle Solver by Saul Sayers (13520094)\n");
-            printf("-------------------------------------------------------------------------------\n\n");
+            printf("-----------------------------------------------------------------------------------------\n\n");
         }
     }
     return 0;
