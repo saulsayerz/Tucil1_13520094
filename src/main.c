@@ -55,10 +55,10 @@ void readinput(Matrix *crossword, Matrix *hasil, Keywords *keys){
 
     //bagian input nama file hingga benar
     printf("Silahkan input nama file: ");
-    char namafile[40] ;
+    char namafile[70] ;
     fflush(stdin); //agar tidak ada error bug di input sebelumnya
     gets(namafile);
-    char direktori[50];
+    char direktori[80];
     strcpy(direktori, "../test/");
     strcat(direktori, namafile);
     tape = fopen(direktori, "r");
@@ -158,7 +158,6 @@ void checkright(int a, int i, int j, int *perbandingan, Matrix crossword, Matrix
             printf("%s\n", ELMTK(keys,a)); 
             displayMatrix(hasil); 
             printf("\n");
-            printf("\n");
             for (bebas=0; bebas< panjang; bebas ++) {
                 ELMT(hasil,i,j+bebas) = '-'; 
             }
@@ -188,7 +187,6 @@ void checkdown(int a, int i, int j, int *perbandingan, Matrix crossword, Matrix 
             *ketemu = true;
             printf("%s\n", ELMTK(keys,a)); 
             displayMatrix(hasil); 
-            printf("\n");
             printf("\n");
             for (bebas=0; bebas< panjang; bebas ++) {
                 ELMT(hasil,i+bebas,j) = '-'; 
@@ -220,7 +218,6 @@ void checkleft(int a, int i, int j, int *perbandingan, Matrix crossword, Matrix 
             printf("%s\n", ELMTK(keys,a)); 
             displayMatrix(hasil); 
             printf("\n");
-            printf("\n");
             for (bebas=0; bebas< panjang; bebas ++) {
                 ELMT(hasil,i,j-bebas) = '-'; 
             }
@@ -250,7 +247,6 @@ void checkup(int a, int i, int j, int *perbandingan, Matrix crossword, Matrix ha
             *ketemu = true;
             printf("%s\n", ELMTK(keys,a)); 
             displayMatrix(hasil); 
-            printf("\n");
             printf("\n");
             for (bebas=0; bebas< panjang; bebas ++) {
                 ELMT(hasil,i-bebas,j) = '-'; 
@@ -284,7 +280,6 @@ void checkdownright(int a, int i, int j, int *perbandingan, Matrix crossword, Ma
             printf("%s\n", ELMTK(keys,a)); 
             displayMatrix(hasil); 
             printf("\n");
-            printf("\n");
             for (bebas=0; bebas< panjang; bebas ++) {
                 ELMT(hasil,i+bebas,j+bebas) = '-'; 
             }
@@ -316,7 +311,6 @@ void checkdownleft(int a, int i, int j, int *perbandingan, Matrix crossword, Mat
             *ketemu = true;
             printf("%s\n", ELMTK(keys,a)); 
             displayMatrix(hasil); 
-            printf("\n");
             printf("\n");
             for (bebas=0; bebas< panjang; bebas ++) {
                 ELMT(hasil,i+bebas,j-bebas) = '-'; 
@@ -350,7 +344,6 @@ void checkupright(int a, int i, int j, int *perbandingan, Matrix crossword, Matr
             printf("%s\n", ELMTK(keys,a)); 
             displayMatrix(hasil); 
             printf("\n");
-            printf("\n");
             for (bebas=0; bebas< panjang; bebas ++) {
                 ELMT(hasil,i-bebas,j+bebas) = '-'; 
             }
@@ -383,7 +376,6 @@ void checkupleft(int a, int i, int j, int *perbandingan, Matrix crossword, Matri
             printf("%s\n", ELMTK(keys,a)); 
             displayMatrix(hasil); 
             printf("\n");
-            printf("\n");
             for (bebas=0; bebas< panjang; bebas ++) {
                 ELMT(hasil,i-bebas,j-bebas) = '-'; 
             }
@@ -394,7 +386,7 @@ void checkupleft(int a, int i, int j, int *perbandingan, Matrix crossword, Matri
 void solvePuzzle(Matrix *crossword, Matrix *hasil, Keywords *keys){
     printf("\nSolusi dari puzzle adalah: \n\n");
     int a,i,j;
-    int perbandingan=0;
+    int perbandingan=0, perbandingansebelum=0;
     int selisih = 0;
     boolean ketemu;
     for (a=0;a<NEFF(*keys);a++) {
@@ -421,10 +413,12 @@ void solvePuzzle(Matrix *crossword, Matrix *hasil, Keywords *keys){
         }
         i=0; 
         if (!ketemu) {
-            printf("%s tidak ditemukan dalam puzzle\n", ELMTK(*keys,a));
-            printf("\n");
+            printf("%s tidak ditemukan dalam puzzle\n\n", ELMTK(*keys,a));
         }
-        //printf("Total perbandingan huruf ada sebanyak %d\n", perbandingan);
+        else {
+            printf("diperlukan perbandingan huruf sebanyak %d\n\n", perbandingan - perbandingansebelum);
+        }
+        perbandingansebelum = perbandingan;
     }
     printf("Total perbandingan huruf ada sebanyak %d\n", perbandingan);
 
